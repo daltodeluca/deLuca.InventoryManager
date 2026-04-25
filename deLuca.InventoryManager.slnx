@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="deLuca.InventoryManager.Api/deLuca.InventoryManager.Api.csproj" />
+  <Project Path="deLuca.InventoryManager.Tests/deLuca.InventoryManager.Tests.csproj" />
+</Solution>
