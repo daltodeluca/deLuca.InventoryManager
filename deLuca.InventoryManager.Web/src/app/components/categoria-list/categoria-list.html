@@ -1,0 +1,12 @@
+<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+    <h3>Lista de Categorias</h3>
+    <p>Status: <strong>{{ statusMessage }}</strong></p>
+  
+    <button (click)="loadCategorias()" [disabled]="isLoading" style="padding: 10px; cursor: pointer;">
+      {{ isLoading ? 'Carregando...' : 'Load Categorias' }}
+    </button>
+  
+    <ul *ngIf="categorias.length > 0" style="margin-top: 20px;">
+      <li *ngFor="let cat of categorias">{{ cat.nome }}</li>
+    </ul>
+  </div>
