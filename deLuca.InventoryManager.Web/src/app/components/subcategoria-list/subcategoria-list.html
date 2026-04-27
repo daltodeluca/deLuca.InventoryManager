@@ -1,14 +1,27 @@
-<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
-    <h3>Lista de Subcategorias</h3>
-    <p>Status: <strong>{{ statusMessage }}</strong></p>
+<div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+  <h4>Nova Subcategoria</h4>
+  <input type="text" [(ngModel)]="novaSub.nome" placeholder="Nome da Subcategoria" style="padding: 8px;">
   
-    <button (click)="loadSubcategorias()" [disabled]="isLoading" style="padding: 10px; cursor: pointer;">
-      {{ isLoading ? 'Carregando...' : 'Load Subcategorias' }}
+  <select [(ngModel)]="novaSub.categoriaId" style="padding: 8px; margin: 0 10px;">
+    <option [value]="0" disabled>Selecione a Categoria</option>
+    <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
+  </select>
+
+  <button (click)="salvar()" [disabled]="isSaving || novaSub.categoriaId === 0">
+    {{ isSaving ? 'Gravando...' : 'Adicionar' }}
+  </button>
+</div>
+
+<p *ngIf="statusMessage">{{ statusMessage }}</p>
+
+<ul style="list-style: none; padding: 0;">
+  <li *ngFor="let sub of subcategorias" style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">
+    <span>
+      <strong>{{ sub.nome }}</strong> 
+      <small style="color: gray; margin-left: 10px;">(Cat: {{ sub.categoriaNome }})</small>
+    </span>
+    <button (click)="excluir(sub.id)" style="color: red; border: none; background: none; cursor: pointer; font-size: 1.2rem;">
+      🗑️
     </button>
-  
-    <ul *ngIf="subcategorias.length > 0" style="margin-top: 20px;">
-      <li *ngFor="let sub of subcategorias">
-        {{ sub.nome }} <small style="color: gray;">(Categoria: {{ sub.categoriaNome }})</small>
-      </li>
-    </ul>
-  </div>
+  </li>
+</ul>

@@ -6,7 +6,7 @@ namespace deLuca.InventoryManager.Api.DTOs;
 public record CategoriaResponse(int Id, string Nome, string Prefixo);
 public record CreateCategoriaRequest(string Nome, string Prefixo);
 
-public record SubcategoriaResponse(int Id, string Nome, string CategoriaNome);
+public record SubcategoriaResponse(int Id, string Nome, int CategoriaId, string CategoriaNome);
 public record CreateSubcategoriaRequest(string Nome, int CategoriaId);
 
 public record ItemResponse(int Id, string CodigoFormatado, string Descricao, string SubcategoriaNome);

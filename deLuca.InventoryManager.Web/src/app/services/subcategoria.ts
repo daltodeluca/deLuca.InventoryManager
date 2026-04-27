@@ -14,4 +14,12 @@ export class SubcategoriaService {
   getSubcategorias(): Observable<SubcategoriaResponse[]> {
     return this.http.get<SubcategoriaResponse[]>(this.apiUrl);
   }
+
+  addSubcategoria(dados: { nome: string; categoriaId: number }): Observable<SubcategoriaResponse> {
+    return this.http.post<SubcategoriaResponse>(this.apiUrl, dados);
+  }
+  
+  deleteSubcategoria(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }
