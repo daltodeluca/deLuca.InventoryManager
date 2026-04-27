@@ -1,17 +1,42 @@
-<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
-  <h3>Lista de Itens (Inventário)</h3>
-  <p>Status: <strong>{{ statusMessage }}</strong></p>
+<div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffe0b2;">
+  <h4>📦 Novo Item no Inventário</h4>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+    <input type="text" [(ngModel)]="novoItem.codigoFormatado" placeholder="Código (Ex: CAB-001)" style="padding: 8px;">
+    <input type="text" [(ngModel)]="novoItem.descricao" placeholder="Descrição/Nome do Produto" style="padding: 8px;">
+  </div>
 
-  <button (click)="loadItens()" [disabled]="isLoading" style="padding: 10px; cursor: pointer;">
-    {{ isLoading ? 'Buscando no estoque...' : 'Load Itens' }}
-  </button>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    
+    <select [(ngModel)]="categoriaSelecionadaId" (change)="onCategoriaChange()" style="padding: 8px; flex: 1;">
+      <option [value]="0">-- Selecione a Categoria --</option>
+      <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
+    </select>
 
-  <ul *ngIf="itens.length > 0" style="margin-top: 20px; list-style: none; padding: 0;">
-    <li *ngFor="let item of itens" style="padding: 8px 0; border-bottom: 1px solid #eee;">
-      
-      <strong>📦 [{{ item.codigoFormatado }}] {{ item.descricao }}</strong>
-      <small style="color: gray; margin-left: 10px;">(Subcategoria: {{ item.subcategoriaNome }})</small>
+    <select [(ngModel)]="novoItem.subcategoriaId" [disabled]="categoriaSelecionadaId === 0" style="padding: 8px; flex: 1;">
+      <option [value]="0">-- Selecione a Subcategoria --</option>
+      <option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">{{ sub.nome }}</option>
+    </select>
 
-    </li>
-  </ul>
+    <button (click)="salvar()" 
+            [disabled]="isSaving || novoItem.subcategoriaId === 0 || !novoItem.descricao" 
+            style="padding: 8px 20px; background: #fb8c00; color: white; border: none; border-radius: 4px; cursor: pointer;">
+      {{ isSaving ? 'Gravando...' : 'Gravar Item' }}
+    </button>
+  </div>
+  
+  <small *ngIf="categoriaSelecionadaId > 0 && subcategoriasFiltradas.length === 0" style="color: #e67e22; display: block; margin-top: 5px;">
+    ⚠️ Nenhuma subcategoria cadastrada para esta categoria.
+  </small>
 </div>
+
+<ul style="list-style: none; padding: 0;">
+  <li *ngFor="let item of itens" style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: white; margin-bottom: 5px; border-radius: 4px;">
+    <span>
+      <strong>[{{ item.codigoFormatado }}]</strong> {{ item.descricao }}
+      <br>
+      <small style="color: #7f8c8d;">🏷️ {{ item.subcategoriaNome }}</small>
+    </span>
+    <button (click)="excluir(item.id)" style="color: #e74c3c; border: none; background: none; cursor: pointer; font-size: 1.2rem;">🗑️</button>
+  </li>
+</ul>

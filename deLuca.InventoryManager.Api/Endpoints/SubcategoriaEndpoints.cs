@@ -12,7 +12,7 @@ public static class SubcategoriaEndpoints
         subcategorias.MapGet("/", async (InventoryContext db) =>
         {
             var list = await db.Subcategorias
-                .Select(s => new SubcategoriaResponse(s.Id, s.Nome, s.Categoria != null ? s.Categoria.Nome : string.Empty))
+                .Select(s => new SubcategoriaResponse(s.Id, s.Nome, s.CategoriaId, s.Categoria != null ? s.Categoria.Nome : string.Empty))
                 .ToListAsync();
             return Results.Ok(list);
         });
@@ -23,7 +23,7 @@ public static class SubcategoriaEndpoints
             db.Subcategorias.Add(sub);
             await db.SaveChangesAsync();
             var categoria = await db.Categorias.FindAsync(sub.CategoriaId);
-            return Results.Created($"/api/subcategorias/{sub.Id}", new SubcategoriaResponse(sub.Id, sub.Nome, categoria?.Nome ?? string.Empty));
+            return Results.Created($"/api/subcategorias/{sub.Id}", new SubcategoriaResponse(sub.Id, sub.Nome, sub.CategoriaId, categoria?.Nome ?? string.Empty));
         }).AddEndpointFilter<ValidationFilter<CreateSubcategoriaRequest>>().RequireAuthorization();
 
         subcategorias.MapPut("/{id}", async (int id, UpdateSubcategoriaRequest req, InventoryContext db) =>

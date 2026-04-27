@@ -1,0 +1,6 @@
+<div style="max-width: 300px; margin: 100px auto; padding: 20px; border: 1px solid #ccc;">
+    <h3>Login</h3>
+    <input type="text" [(ngModel)]="credentials.email" placeholder="Email" style="width:100%; margin-bottom:10px;">
+    <input type="password" [(ngModel)]="credentials.password" placeholder="Senha" style="width:100%; margin-bottom:10px;">
+    <button (click)="efetuarLogin()" style="width:100%">Entrar</button>
+  </div>
