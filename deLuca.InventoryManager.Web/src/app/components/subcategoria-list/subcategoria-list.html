@@ -1,0 +1,14 @@
+<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
+    <h3>Lista de Subcategorias</h3>
+    <p>Status: <strong>{{ statusMessage }}</strong></p>
+  
+    <button (click)="loadSubcategorias()" [disabled]="isLoading" style="padding: 10px; cursor: pointer;">
+      {{ isLoading ? 'Carregando...' : 'Load Subcategorias' }}
+    </button>
+  
+    <ul *ngIf="subcategorias.length > 0" style="margin-top: 20px;">
+      <li *ngFor="let sub of subcategorias">
+        {{ sub.nome }} <small style="color: gray;">(Categoria: {{ sub.categoriaNome }})</small>
+      </li>
+    </ul>
+  </div>

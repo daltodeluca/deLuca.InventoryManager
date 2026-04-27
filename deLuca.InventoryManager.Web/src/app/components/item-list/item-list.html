@@ -1,0 +1,17 @@
+<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
+  <h3>Lista de Itens (Inventário)</h3>
+  <p>Status: <strong>{{ statusMessage }}</strong></p>
+
+  <button (click)="loadItens()" [disabled]="isLoading" style="padding: 10px; cursor: pointer;">
+    {{ isLoading ? 'Buscando no estoque...' : 'Load Itens' }}
+  </button>
+
+  <ul *ngIf="itens.length > 0" style="margin-top: 20px; list-style: none; padding: 0;">
+    <li *ngFor="let item of itens" style="padding: 8px 0; border-bottom: 1px solid #eee;">
+      
+      <strong>📦 [{{ item.codigoFormatado }}] {{ item.descricao }}</strong>
+      <small style="color: gray; margin-left: 10px;">(Subcategoria: {{ item.subcategoriaNome }})</small>
+
+    </li>
+  </ul>
+</div>
