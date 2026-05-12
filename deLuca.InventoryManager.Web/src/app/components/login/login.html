@@ -1,6 +1,31 @@
-<div style="max-width: 300px; margin: 100px auto; padding: 20px; border: 1px solid #ccc;">
-    <h3>Login</h3>
-    <input type="text" [(ngModel)]="credentials.email" placeholder="Email" style="width:100%; margin-bottom:10px;">
-    <input type="password" [(ngModel)]="credentials.password" placeholder="Senha" style="width:100%; margin-bottom:10px;">
-    <button (click)="efetuarLogin()" style="width:100%">Entrar</button>
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+  <div class="card shadow-sm" style="width: 360px;">
+    <div class="card-header bg-dark text-white text-center">
+      <h5 class="mb-0">🔑 Acesso ao Sistema</h5>
+    </div>
+    <div class="card-body p-4">
+
+      @if (statusMessage) {
+        <div class="alert alert-danger py-2 text-center">{{ statusMessage }}</div>
+      }
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">E-mail</label>
+        <input type="email" class="form-control" placeholder="seu@email.com"
+               [(ngModel)]="credentials.email">
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Senha</label>
+        <input type="password" class="form-control" placeholder="••••••••"
+               [(ngModel)]="credentials.password">
+      </div>
+
+      <button class="btn btn-dark w-100"
+              (click)="efetuarLogin()"
+              [disabled]="isLoading">
+        {{ isLoading ? 'Autenticando...' : 'Entrar' }}
+      </button>
+
+    </div>
   </div>
+</div>

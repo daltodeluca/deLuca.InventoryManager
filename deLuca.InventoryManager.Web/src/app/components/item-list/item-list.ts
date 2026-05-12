@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemService } from '../../services/item';
 import { SubcategoriaService } from '../../services/subcategoria';
-import { CategoriaService } from '../../services/categoria'; // Importação nova
+import { CategoriaService } from '../../services/categoria';
 import { ItemResponse } from '../../models/item.model';
 import { SubcategoriaResponse } from '../../models/subcategoria.model';
 import { CategoriaResponse } from '../../models/categoria.model';
@@ -24,7 +24,7 @@ export class ItemList implements OnInit {
   categorias: CategoriaResponse[] = [];
   todasSubcategorias: SubcategoriaResponse[] = [];
   subcategoriasFiltradas: SubcategoriaResponse[] = [];
-  
+
   categoriaSelecionadaId: number = 0;
   novoItem = { codigoFormatado: '', descricao: '', subcategoriaId: 0 };
   isSaving = false;

@@ -1,39 +1,29 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using deLuca.InventoryManager.Api.DTOs;
+using deLuca.InventoryManager.Application.DTOs;
+using deLuca.InventoryManager.Application.Services;
+
+namespace deLuca.InventoryManager.Api.Endpoints;
 
 public static class AuthEndpoints
 {
-    public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        var auth = app.MapGroup("/api/auth");
+        var group = app.MapGroup("/api/auth").WithTags("Auth");
 
-        auth.MapPost("/login", (LoginRequest req, IConfiguration config, ILoggerFactory loggerFactory) =>
+        group.MapPost("/login", (LoginRequest request, IAuthService authService,
+            ILoggerFactory loggerFactory, CancellationToken ct) =>
         {
-            var logger = loggerFactory.CreateLogger("AuthEndpoints");
-            var adminEmail = config["AdminConfig:Email"];
-            var adminPassword = config["AdminConfig:Password"];
+            var token = authService.Authenticate(request, ct);
 
-            if (req.Email == adminEmail && req.Password == adminPassword)
+            if (token is null)
             {
-                var jwtKey = config["Jwt:Key"];
-                var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
-                var claims = new[] { new Claim(ClaimTypes.Name, req.Email), new Claim(ClaimTypes.Role, "Admin") };
-
-                var token = new JwtSecurityToken(
-                    issuer: config["Jwt:Issuer"],
-                    audience: config["Jwt:Audience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddHours(2),
-                    signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256)
-                );
-                return Results.Ok(new { Token = new JwtSecurityTokenHandler().WriteToken(token) });
+                loggerFactory.CreateLogger("Auth")
+                    .LogWarning("Failed login attempt for {Email}", request.Email);
+                return Results.Unauthorized();
             }
 
-            logger.LogWarning("Failed login attempt for {Email}", req.Email);
-            return Results.Unauthorized();
+            return Results.Ok(new { Token = token });
         });
+
+        return app;
     }
 }

@@ -1,42 +1,44 @@
-<div style="display: flex; height: 100vh; font-family: sans-serif;">
-  
-  <nav style="width: 250px; background-color: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-    
+<div class="d-flex" style="min-height: 100vh;">
+
+  <nav class="bg-dark text-white p-3 d-flex flex-column justify-content-between" style="width: 240px; min-height: 100vh;">
     <div>
-      <h2 style="margin-top: 0;">Inventory App</h2>
-      
-      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px;">
-        <li>
-          <a routerLink="/categorias" style="color: white; text-decoration: none;">📁 Categorias</a>
+      <h5 class="fw-bold mb-4">📦 Inventory App</h5>
+      <ul class="nav flex-column gap-1">
+        <li class="nav-item">
+          <a routerLink="/categorias" routerLinkActive="active"
+             class="nav-link text-white-50 px-2 py-2 rounded">
+            📁 Categorias
+          </a>
         </li>
-        <li>
-          <a routerLink="/subcategorias" style="color: white; text-decoration: none;">📂 Subcategorias</a>
+        <li class="nav-item">
+          <a routerLink="/subcategorias" routerLinkActive="active"
+             class="nav-link text-white-50 px-2 py-2 rounded">
+            📂 Subcategorias
+          </a>
         </li>
-        <li>
-          <a routerLink="/itens" style="color: white; text-decoration: none;">📦 Itens</a>
+        <li class="nav-item">
+          <a routerLink="/itens" routerLinkActive="active"
+             class="nav-link text-white-50 px-2 py-2 rounded">
+            📦 Itens
+          </a>
         </li>
       </ul>
     </div>
 
-    <div style="border-top: 1px solid #444; padding-top: 20px;">
-      
-      <a *ngIf="!estaLogado" 
-         routerLink="/login" 
-         style="display: block; text-align: center; background: #3498db; color: white; text-decoration: none; padding: 10px; border-radius: 4px;">
+    <div class="border-top border-secondary pt-3">
+      <a *ngIf="!estaLogado" routerLink="/login"
+         class="btn btn-primary w-100">
         🔑 Entrar no Sistema
       </a>
-
-      <button *ngIf="estaLogado" 
-              (click)="logout()" 
-              style="width: 100%; background: #c0392b; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">
+      <button *ngIf="estaLogado" (click)="logout()"
+              class="btn btn-danger w-100">
         🚪 Sair (Logout)
       </button>
-
     </div>
   </nav>
 
-  <main style="flex: 1; padding: 30px; background-color: #f8f9fa;">
-    <router-outlet></router-outlet> 
+  <main class="flex-grow-1 p-4 bg-light">
+    <router-outlet></router-outlet>
   </main>
 
 </div>

@@ -1,47 +1,48 @@
-﻿using Microsoft.EntityFrameworkCore;
-using deLuca.InventoryManager.Api.Data;
-using deLuca.InventoryManager.Api.DTOs;
-using deLuca.InventoryManager.Api.Validations;
+using deLuca.InventoryManager.Api.Filters;
+using deLuca.InventoryManager.Application.Features.Categorias.Commands;
+using deLuca.InventoryManager.Application.Features.Categorias.Queries;
+using MediatR;
+
+namespace deLuca.InventoryManager.Api.Endpoints;
 
 public static class CategoriaEndpoints
 {
-    public static void MapCategoriaEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapCategoriaEndpoints(this IEndpointRouteBuilder app)
     {
-        var categorias = app.MapGroup("/api/categorias");
+        var group = app.MapGroup("/api/categorias").WithTags("Categorias");
 
-        categorias.MapGet("/", async (InventoryContext db) =>
+        group.MapGet("/", async (ISender sender, CancellationToken ct) =>
+            Results.Ok(await sender.Send(new GetAllCategoriasQuery(), ct)));
+
+        group.MapGet("/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var list = await db.Categorias
-                .Select(c => new CategoriaResponse(c.Id, c.Nome, c.Prefixo))
-                .ToListAsync();
-            return Results.Ok(list);
+            var result = await sender.Send(new GetCategoriaByIdQuery(id), ct);
+            return result is not null ? Results.Ok(result) : Results.NotFound();
         });
 
-        categorias.MapPost("/", async (CreateCategoriaRequest req, InventoryContext db) =>
+        group.MapPost("/", async (CreateCategoriaCommand command, ISender sender, CancellationToken ct) =>
         {
-            var categoria = new Categoria { Nome = req.Nome, Prefixo = req.Prefixo };
-            db.Categorias.Add(categoria);
-            await db.SaveChangesAsync();
-            return Results.Created($"/api/categorias/{categoria.Id}", new CategoriaResponse(categoria.Id, categoria.Nome, categoria.Prefixo));
-        }).AddEndpointFilter<ValidationFilter<CreateCategoriaRequest>>().RequireAuthorization();
+            var result = await sender.Send(command, ct);
+            return Results.Created($"/api/categorias/{result.Id}", result);
+        })
+        .AddEndpointFilter<ValidationFilter<CreateCategoriaCommand>>()
+        .RequireAuthorization();
 
-        categorias.MapPut("/{id}", async (int id, UpdateCategoriaRequest req, InventoryContext db) =>
+        group.MapPut("/{id:int}", async (int id, UpdateCategoriaCommand command, ISender sender, CancellationToken ct) =>
         {
-            var categoria = await db.Categorias.FindAsync(id);
-            if (categoria is null) return Results.NotFound();
-            categoria.Nome = req.Nome;
-            categoria.Prefixo = req.Prefixo;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).AddEndpointFilter<ValidationFilter<UpdateCategoriaRequest>>().RequireAuthorization();
+            var updated = await sender.Send(command with { Id = id }, ct);
+            return updated ? Results.NoContent() : Results.NotFound();
+        })
+        .AddEndpointFilter<ValidationFilter<UpdateCategoriaCommand>>()
+        .RequireAuthorization();
 
-        categorias.MapDelete("/{id}", async (int id, InventoryContext db) =>
+        group.MapDelete("/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var categoria = await db.Categorias.FindAsync(id);
-            if (categoria is null) return Results.NotFound();
-            categoria.Ativo = false;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).RequireAuthorization();
+            var deleted = await sender.Send(new DeleteCategoriaCommand(id), ct);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+        .RequireAuthorization();
+
+        return app;
     }
 }

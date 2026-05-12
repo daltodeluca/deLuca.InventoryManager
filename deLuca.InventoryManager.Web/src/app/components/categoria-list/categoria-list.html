@@ -1,54 +1,81 @@
-<div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
-  <h3>Gerenciamento de Categorias</h3>
-  <p>Status: <strong>{{ statusMessage }}</strong></p>
-
-  <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-    <h4>Nova Categoria</h4>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <input type="text" placeholder="Nome (Ex: Energia)" 
-             [(ngModel)]="novaCategoria.nome" 
-             style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
-             
-             <input type="text" 
-             placeholder="Prefixo (Ex: ENG-)" 
-             [(ngModel)]="novaCategoria.prefixo" 
-             maxlength="4"
-             style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100px;"
-             [style.border-color]="novaCategoria.prefixo.length < 4 ? 'orange' : '#ccc'">
-      
-      <button (click)="salvarCategoria()" 
-              [disabled]="isSaving || novaCategoria.prefixo.length < 4 || !novaCategoria.nome" 
-              style="padding: 8px 15px; background: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer;"
-              [style.opacity]="(isSaving || novaCategoria.prefixo.length < 4) ? 0.5 : 1">
-        {{ isSaving ? 'Salvando...' : 'Adicionar' }}
-      </button>
-      
-      <small *ngIf="novaCategoria.prefixo.length > 0 && novaCategoria.prefixo.length < 4" style="color: orange; display: block; margin-top: 5px;">
-        O prefixo deve ter 4 caracteres (ex: CAT-).
-      </small>
-    </div>
+<div class="card shadow-sm">
+  <div class="card-header bg-success text-white">
+    <h5 class="mb-0">Gerenciamento de Categorias</h5>
   </div>
+  <div class="card-body">
 
-  <button (click)="loadCategorias()" [disabled]="isLoading" style="padding: 10px; cursor: pointer; margin-bottom: 15px;">
-    {{ isLoading ? 'Buscando...' : 'Atualizar Lista' }}
-  </button>
+    @if (statusMessage) {
+      <div class="alert alert-success py-2">{{ statusMessage }}</div>
+    }
 
-  <ul *ngIf="categorias.length > 0" style="list-style: none; padding: 0;">
-    <li *ngFor="let cat of categorias" 
-        style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-      
-      <span>
-        <strong>{{ cat.nome }}</strong> 
-        <small style="color: gray; margin-left: 10px;">[{{ cat.prefixo }}]</small>
-      </span>
+    <div class="card mb-3 border-success">
+      <div class="card-body bg-success-subtle">
+        <h6 class="card-title fw-semibold">Nova Categoria</h6>
+        <div class="row g-2 align-items-start">
+          <div class="col">
+            <input type="text" class="form-control" placeholder="Nome (Ex: Energia)"
+                   [(ngModel)]="novaCategoria.nome">
+          </div>
+          <div class="col-auto">
+            <input type="text" class="form-control"
+                   [class.border-warning]="novaCategoria.prefixo.length > 0 && novaCategoria.prefixo.length < 4"
+                   placeholder="Prefixo (Ex: ENG-)"
+                   [(ngModel)]="novaCategoria.prefixo"
+                   maxlength="4"
+                   style="width: 130px;">
+            @if (novaCategoria.prefixo.length > 0 && novaCategoria.prefixo.length < 4) {
+              <small class="text-warning">Deve ter 4 caracteres.</small>
+            }
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-success"
+                    (click)="salvarCategoria()"
+                    [disabled]="isSaving || novaCategoria.prefixo.length < 4 || !novaCategoria.nome">
+              {{ isSaving ? 'Salvando...' : 'Adicionar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <button (click)="excluirCategoria(cat.id)" 
-              style="background: none; border: none; cursor: pointer; color: #e74c3c; font-size: 1.2rem;" 
-              title="Excluir Categoria">
-        🗑️
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-outline-secondary btn-sm" (click)="loadCategorias()" [disabled]="isLoading">
+        {{ isLoading ? 'Buscando...' : '↻ Atualizar Lista' }}
       </button>
-    </li>
-  </ul>
+    </div>
 
-  <p *ngIf="categorias.length === 0 && !isLoading" style="color: gray;">Nenhuma categoria encontrada.</p>
+    @if (isLoading) {
+      <div class="text-center py-3">
+        <span class="spinner-border spinner-border-sm me-2"></span>Carregando...
+      </div>
+    } @else if (categorias.length === 0) {
+      <p class="text-muted text-center py-3">Nenhuma categoria encontrada.</p>
+    } @else {
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nome</th>
+            <th>Prefixo</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categorias; track cat.id) {
+            <tr>
+              <td><strong>{{ cat.nome }}</strong></td>
+              <td><span class="badge bg-secondary">{{ cat.prefixo }}</span></td>
+              <td class="text-end">
+                <button class="btn btn-outline-danger btn-sm"
+                        (click)="excluirCategoria(cat.id)"
+                        title="Excluir">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </div>
 </div>

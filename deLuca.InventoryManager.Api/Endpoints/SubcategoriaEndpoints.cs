@@ -1,48 +1,48 @@
-﻿using Microsoft.EntityFrameworkCore;
-using deLuca.InventoryManager.Api.Data;
-using deLuca.InventoryManager.Api.DTOs;
-using deLuca.InventoryManager.Api.Validations;
+using deLuca.InventoryManager.Api.Filters;
+using deLuca.InventoryManager.Application.Features.Subcategorias.Commands;
+using deLuca.InventoryManager.Application.Features.Subcategorias.Queries;
+using MediatR;
+
+namespace deLuca.InventoryManager.Api.Endpoints;
 
 public static class SubcategoriaEndpoints
 {
-    public static void MapSubcategoriaEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapSubcategoriaEndpoints(this IEndpointRouteBuilder app)
     {
-        var subcategorias = app.MapGroup("/api/subcategorias");
+        var group = app.MapGroup("/api/subcategorias").WithTags("Subcategorias");
 
-        subcategorias.MapGet("/", async (InventoryContext db) =>
+        group.MapGet("/", async (ISender sender, CancellationToken ct) =>
+            Results.Ok(await sender.Send(new GetAllSubcategoriasQuery(), ct)));
+
+        group.MapGet("/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var list = await db.Subcategorias
-                .Select(s => new SubcategoriaResponse(s.Id, s.Nome, s.CategoriaId, s.Categoria != null ? s.Categoria.Nome : string.Empty))
-                .ToListAsync();
-            return Results.Ok(list);
+            var result = await sender.Send(new GetSubcategoriaByIdQuery(id), ct);
+            return result is not null ? Results.Ok(result) : Results.NotFound();
         });
 
-        subcategorias.MapPost("/", async (CreateSubcategoriaRequest req, InventoryContext db) =>
+        group.MapPost("/", async (CreateSubcategoriaCommand command, ISender sender, CancellationToken ct) =>
         {
-            var sub = new Subcategoria { Nome = req.Nome, CategoriaId = req.CategoriaId };
-            db.Subcategorias.Add(sub);
-            await db.SaveChangesAsync();
-            var categoria = await db.Categorias.FindAsync(sub.CategoriaId);
-            return Results.Created($"/api/subcategorias/{sub.Id}", new SubcategoriaResponse(sub.Id, sub.Nome, sub.CategoriaId, categoria?.Nome ?? string.Empty));
-        }).AddEndpointFilter<ValidationFilter<CreateSubcategoriaRequest>>().RequireAuthorization();
+            var result = await sender.Send(command, ct);
+            return Results.Created($"/api/subcategorias/{result.Id}", result);
+        })
+        .AddEndpointFilter<ValidationFilter<CreateSubcategoriaCommand>>()
+        .RequireAuthorization();
 
-        subcategorias.MapPut("/{id}", async (int id, UpdateSubcategoriaRequest req, InventoryContext db) =>
+        group.MapPut("/{id:int}", async (int id, UpdateSubcategoriaCommand command, ISender sender, CancellationToken ct) =>
         {
-            var sub = await db.Subcategorias.FindAsync(id);
-            if (sub is null) return Results.NotFound();
-            sub.Nome = req.Nome;
-            sub.CategoriaId = req.CategoriaId;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).AddEndpointFilter<ValidationFilter<UpdateSubcategoriaRequest>>().RequireAuthorization();
+            var updated = await sender.Send(command with { Id = id }, ct);
+            return updated ? Results.NoContent() : Results.NotFound();
+        })
+        .AddEndpointFilter<ValidationFilter<UpdateSubcategoriaCommand>>()
+        .RequireAuthorization();
 
-        subcategorias.MapDelete("/{id}", async (int id, InventoryContext db) =>
+        group.MapDelete("/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var sub = await db.Subcategorias.FindAsync(id);
-            if (sub is null) return Results.NotFound();
-            sub.Ativo = false;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).RequireAuthorization();
+            var deleted = await sender.Send(new DeleteSubcategoriaCommand(id), ct);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+        .RequireAuthorization();
+
+        return app;
     }
 }

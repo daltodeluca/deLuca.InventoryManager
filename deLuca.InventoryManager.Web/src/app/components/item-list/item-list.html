@@ -1,42 +1,82 @@
-<div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffe0b2;">
-  <h4>📦 Novo Item no Inventário</h4>
-  
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-    <input type="text" [(ngModel)]="novoItem.codigoFormatado" placeholder="Código (Ex: CAB-001)" style="padding: 8px;">
-    <input type="text" [(ngModel)]="novoItem.descricao" placeholder="Descrição/Nome do Produto" style="padding: 8px;">
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-warning text-dark">
+    <h5 class="mb-0">📦 Gerenciamento de Itens</h5>
   </div>
+  <div class="card-body">
 
-  <div style="display: flex; gap: 10px; align-items: center;">
-    
-    <select [(ngModel)]="categoriaSelecionadaId" (change)="onCategoriaChange()" style="padding: 8px; flex: 1;">
-      <option [value]="0">-- Selecione a Categoria --</option>
-      <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
-    </select>
+    <div class="card mb-3 border-warning">
+      <div class="card-body bg-warning-subtle">
+        <h6 class="card-title fw-semibold">Novo Item no Inventário</h6>
 
-    <select [(ngModel)]="novoItem.subcategoriaId" [disabled]="categoriaSelecionadaId === 0" style="padding: 8px; flex: 1;">
-      <option [value]="0">-- Selecione a Subcategoria --</option>
-      <option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">{{ sub.nome }}</option>
-    </select>
+        <div class="row g-2 mb-2">
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Código (Ex: CAB-001)"
+                   [(ngModel)]="novoItem.codigoFormatado">
+          </div>
+          <div class="col-md-8">
+            <input type="text" class="form-control" placeholder="Descrição/Nome do Produto"
+                   [(ngModel)]="novoItem.descricao">
+          </div>
+        </div>
 
-    <button (click)="salvar()" 
-            [disabled]="isSaving || novoItem.subcategoriaId === 0 || !novoItem.descricao" 
-            style="padding: 8px 20px; background: #fb8c00; color: white; border: none; border-radius: 4px; cursor: pointer;">
-      {{ isSaving ? 'Gravando...' : 'Gravar Item' }}
-    </button>
+        <div class="row g-2 align-items-start">
+          <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="categoriaSelecionadaId" (change)="onCategoriaChange()">
+              <option [value]="0">-- Selecione a Categoria --</option>
+              <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="novoItem.subcategoriaId"
+                    [disabled]="categoriaSelecionadaId === 0">
+              <option [value]="0">-- Selecione a Subcategoria --</option>
+              <option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">{{ sub.nome }}</option>
+            </select>
+            @if (categoriaSelecionadaId > 0 && subcategoriasFiltradas.length === 0) {
+              <small class="text-warning">Nenhuma subcategoria para esta categoria.</small>
+            }
+          </div>
+          <div class="col-md-4">
+            <button class="btn btn-warning w-100"
+                    (click)="salvar()"
+                    [disabled]="isSaving || novoItem.subcategoriaId === 0 || !novoItem.descricao || !novoItem.codigoFormatado">
+              {{ isSaving ? 'Gravando...' : 'Gravar Item' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (itens.length === 0) {
+      <p class="text-muted text-center py-3">Nenhum item encontrado.</p>
+    } @else {
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th>Subcategoria</th>
+            <th class="text-end">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of itens; track item.id) {
+            <tr>
+              <td><span class="badge bg-secondary font-monospace">{{ item.codigoFormatado }}</span></td>
+              <td>{{ item.descricao }}</td>
+              <td><small class="text-muted">{{ item.subcategoriaNome }}</small></td>
+              <td class="text-end">
+                <button class="btn btn-outline-danger btn-sm"
+                        (click)="excluir(item.id)"
+                        title="Excluir">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
   </div>
-  
-  <small *ngIf="categoriaSelecionadaId > 0 && subcategoriasFiltradas.length === 0" style="color: #e67e22; display: block; margin-top: 5px;">
-    ⚠️ Nenhuma subcategoria cadastrada para esta categoria.
-  </small>
 </div>
-
-<ul style="list-style: none; padding: 0;">
-  <li *ngFor="let item of itens" style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; background: white; margin-bottom: 5px; border-radius: 4px;">
-    <span>
-      <strong>[{{ item.codigoFormatado }}]</strong> {{ item.descricao }}
-      <br>
-      <small style="color: #7f8c8d;">🏷️ {{ item.subcategoriaNome }}</small>
-    </span>
-    <button (click)="excluir(item.id)" style="color: #e74c3c; border: none; background: none; cursor: pointer; font-size: 1.2rem;">🗑️</button>
-  </li>
-</ul>

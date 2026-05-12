@@ -1,4 +1,8 @@
 <Solution>
-  <Project Path="deLuca.InventoryManager.Api/deLuca.InventoryManager.Api.csproj" />
-  <Project Path="deLuca.InventoryManager.Tests/deLuca.InventoryManager.Tests.csproj" />
+  <Project Path="deLuca.InventoryManager.Api\deLuca.InventoryManager.Api.csproj" />
+  <Project Path="deLuca.InventoryManager.Application\deLuca.InventoryManager.Application.csproj" />
+  <Project Path="deLuca.InventoryManager.Domain\deLuca.InventoryManager.Domain.csproj" />
+  <Project Path="deLuca.InventoryManager.Infrastructure\deLuca.InventoryManager.Infrastructure.csproj" />
+  <Project Path="deLuca.InventoryManager.Tests\deLuca.InventoryManager.Tests.csproj" />
+  <Project Path="deLuca.InventoryManager.IntegrationTests\deLuca.InventoryManager.IntegrationTests.csproj" />
 </Solution>

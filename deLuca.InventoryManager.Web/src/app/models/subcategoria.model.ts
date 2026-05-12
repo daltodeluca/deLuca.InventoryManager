@@ -4,3 +4,8 @@ export interface SubcategoriaResponse {
   categoriaId: number;
   categoriaNome: string;
 }
+
+export interface CreateSubcategoriaRequest {
+  nome: string;
+  categoriaId: number;
+}

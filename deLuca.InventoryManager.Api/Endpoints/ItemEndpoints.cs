@@ -1,68 +1,50 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using deLuca.InventoryManager.Api.Data;
-using deLuca.InventoryManager.Api.DTOs;
-using deLuca.InventoryManager.Api.Validations;
+using deLuca.InventoryManager.Api.Filters;
+using deLuca.InventoryManager.Application.Features.Itens.Commands;
+using deLuca.InventoryManager.Application.Features.Itens.Queries;
+using MediatR;
+
+namespace deLuca.InventoryManager.Api.Endpoints;
 
 public static class ItemEndpoints
 {
-    public static void MapItemEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapItemEndpoints(this IEndpointRouteBuilder app)
     {
-        var itens = app.MapGroup("/api/itens");
+        var group = app.MapGroup("/api/itens").WithTags("Itens");
 
-        itens.MapGet("/", async (InventoryContext db, [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+        group.MapGet("/", async (ISender sender, CancellationToken ct,
+            int page = 1, int pageSize = 10) =>
+            Results.Ok(await sender.Send(new GetItensPagedQuery(page, pageSize), ct)));
+
+        // Rota específica para detalhes do item: /api/itens/detalhes/{id}
+        group.MapGet("/detalhes/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var totalItems = await db.Itens.CountAsync();
-            var query = db.Itens
-                .Select(i => new ItemResponse(i.Id, i.CodigoFormatado, i.Descricao, i.Subcategoria != null ? i.Subcategoria.Nome : string.Empty))
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
-
-            return Results.Ok(new PagedResponse<ItemResponse>
-            {
-                Data = await query.ToListAsync(),
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalItems = totalItems
-            });
+            var result = await sender.Send(new GetItemByIdQuery(id), ct);
+            return result is not null ? Results.Ok(result) : Results.NotFound();
         });
 
-        itens.MapGet("/{id}", async (int id, InventoryContext db) =>
+        group.MapPost("/", async (CreateItemCommand command, ISender sender, CancellationToken ct) =>
         {
-            var item = await db.Itens
-                .Where(i => i.Id == id)
-                .Select(i => new ItemResponse(i.Id, i.CodigoFormatado, i.Descricao, i.Subcategoria != null ? i.Subcategoria.Nome : string.Empty))
-                .FirstOrDefaultAsync();
-            return item is not null ? Results.Ok(item) : Results.NotFound();
-        });
+            var result = await sender.Send(command, ct);
+            return Results.Created($"/api/itens/detalhes/{result.Id}", result);
+        })
+        .AddEndpointFilter<ValidationFilter<CreateItemCommand>>()
+        .RequireAuthorization();
 
-        itens.MapPost("/", async (CreateItemRequest req, InventoryContext db) =>
+        group.MapPut("/{id:int}", async (int id, UpdateItemCommand command, ISender sender, CancellationToken ct) =>
         {
-            var item = new ItemTecnologia { CodigoFormatado = req.CodigoFormatado, Descricao = req.Descricao, SubcategoriaId = req.SubcategoriaId };
-            db.Itens.Add(item);
-            await db.SaveChangesAsync();
-            var sub = await db.Subcategorias.FindAsync(item.SubcategoriaId);
-            return Results.Created($"/api/itens/{item.Id}", new ItemResponse(item.Id, item.CodigoFormatado, item.Descricao, sub?.Nome ?? string.Empty));
-        }).AddEndpointFilter<ValidationFilter<CreateItemRequest>>().RequireAuthorization();
+            var updated = await sender.Send(command with { Id = id }, ct);
+            return updated ? Results.NoContent() : Results.NotFound();
+        })
+        .AddEndpointFilter<ValidationFilter<UpdateItemCommand>>()
+        .RequireAuthorization();
 
-        itens.MapPut("/{id}", async (int id, UpdateItemRequest req, InventoryContext db) =>
+        group.MapDelete("/{id:int}", async (int id, ISender sender, CancellationToken ct) =>
         {
-            var item = await db.Itens.FindAsync(id);
-            if (item is null) return Results.NotFound();
-            item.CodigoFormatado = req.CodigoFormatado;
-            item.Descricao = req.Descricao;
-            item.SubcategoriaId = req.SubcategoriaId;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).AddEndpointFilter<ValidationFilter<UpdateItemRequest>>().RequireAuthorization();
+            var deleted = await sender.Send(new DeleteItemCommand(id), ct);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        })
+        .RequireAuthorization();
 
-        itens.MapDelete("/{id}", async (int id, InventoryContext db) =>
-        {
-            var item = await db.Itens.FindAsync(id);
-            if (item is null) return Results.NotFound();
-            item.Ativo = false;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        }).RequireAuthorization();
+        return app;
     }
 }

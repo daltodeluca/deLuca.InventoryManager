@@ -5,10 +5,16 @@ export interface ItemResponse {
   subcategoriaNome: string;
 }
 
-export interface PaginatedItemResponse {
-  data: ItemResponse[];
+export interface PagedResponse<T> {
+  data: T[];
   currentPage: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
+}
+
+export interface CreateItemRequest {
+  codigoFormatado: string;
+  descricao: string;
+  subcategoriaId: number;
 }
